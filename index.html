@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GROVIA — Grocery Supervisor Assistant</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">G</div>
+
+            <div>
+                <h2>GROVIA</h2>
+                <span>Supervisor Assistant</span>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="workspace-icon">⌂</div>
+
+            <div>
+                <strong>Grocery Department</strong>
+                <span>Supervisor Workspace</span>
+            </div>
+        </div>
+
+        <div class="nav-title">MAIN MENU</div>
+
+        <nav>
+
+            <button class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">▦</span>
+                <span>لوحة التحكم</span>
+            </button>
+
+            <button class="nav-item" data-page="employees">
+                <span class="nav-icon">♙</span>
+                <span>الموظفين</span>
+            </button>
+
+            <button class="nav-item" data-page="followups">
+                <span class="nav-icon">✓</span>
+                <span>المتابعات</span>
+            </button>
+
+            <button class="nav-item" data-page="schedule">
+                <span class="nav-icon">◷</span>
+                <span>الحضور والإجازات</span>
+            </button>
+
+            <button class="nav-item" data-page="companies">
+                <span class="nav-icon">▣</span>
+                <span>الشركات والمرتجعات</span>
+            </button>
+
+            <button class="nav-item" data-page="tasks">
+                <span class="nav-icon">☷</span>
+                <span>المهام</span>
+            </button>
+
+            <button class="nav-item" data-page="reports">
+                <span class="nav-icon">▥</span>
+                <span>التقارير</span>
+            </button>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <button class="ai-sidebar-btn" id="openAssistant">
+                <div class="ai-icon">✦</div>
+
+                <div>
+                    <strong>GROVIA AI</strong>
+                    <span>اسألني عن أي حاجة</span>
+                </div>
+
+                <span class="online-dot"></span>
+            </button>
+
+            <div class="sidebar-footer">
+                <span>GROVIA v2.0</span>
+                <span>● Online</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="top-title">
+                <span class="eyebrow">SUPERVISOR COMMAND CENTER</span>
+                <h1 id="pageTitle">لوحة التحكم</h1>
+            </div>
+
+            <div class="top-actions">
+
+                <div class="global-search">
+                    <span>⌕</span>
+                    <input
+                        type="text"
+                        id="globalSearch"
+                        placeholder="ابحث عن موظف، قسم، شركة..."
+                    >
+                    <kbd>Ctrl K</kbd>
+                </div>
+
+                <button class="icon-button" id="notificationBtn">
+                    🔔
+                    <span class="notification-count" id="notificationCount">0</span>
+                </button>
+
+                <button class="profile">
+                    <div class="avatar">م</div>
+
+                    <div class="profile-info">
+                        <strong>المشرف</strong>
+                        <span>Grocery Supervisor</span>
+                    </div>
+
+                    <span>⌄</span>
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= PAGE CONTAINER ================= -->
+
+        <section class="page-container">
+
+
+            <!-- ================================================= -->
+            <!-- DASHBOARD -->
+            <!-- ================================================= -->
+
+            <div class="page active" id="dashboardPage">
+
+                <section class="hero">
+
+                    <div class="hero-content">
+
+                        <div class="hero-badge">
+                            <span class="pulse"></span>
+                            النظام يعمل بشكل طبيعي
+                        </div>
+
+                        <h2>
+                            صباح الخير يا أ/محمد رضا 👋
+                        </h2>
+
+                        <p id="currentDate">
+                            اليوم
+                        </p>
+
+                    </div>
+
+                    <div class="hero-decoration">
+                        <div class="hero-circle circle-1"></div>
+                        <div class="hero-circle circle-2"></div>
+                        <div class="hero-grid"></div>
+                    </div>
+
+                </section>
+
+
+                <!-- KPI -->
+
+                <section class="kpi-grid">
+
+                    <div class="kpi-card blue">
+
+                        <div class="kpi-top">
+                            <span>إجمالي الموظفين</span>
+                            <div class="kpi-icon">♙</div>
+                        </div>
+
+                        <strong id="totalEmployees">0</strong>
+
+                        <div class="kpi-meta">
+                            <span>فريق الجروسري</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card green">
+
+                        <div class="kpi-top">
+                            <span>حاضر اليوم</span>
+                            <div class="kpi-icon">✓</div>
+                        </div>
+
+                        <strong id="presentCount">0</strong>
+
+                        <div class="kpi-meta">
+                            <span class="positive">● مستقر</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card orange">
+
+                        <div class="kpi-top">
+                            <span>يحتاج متابعة</span>
+                            <div class="kpi-icon">!</div>
+                        </div>
+
+                        <strong id="attentionCount">0</strong>
+
+                        <div class="kpi-meta">
+                            <span>متابعات اليوم</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card purple">
+
+                        <div class="kpi-top">
+                            <span>مهام متأخرة</span>
+                            <div class="kpi-icon">◷</div>
+                        </div>
+
+                        <strong id="lateTasksCount">0</strong>
+
+                        <div class="kpi-meta">
+                            <span>تحتاج تدخل</span>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- DAILY BRIEF -->
+
+                <section class="section-heading">
+
+                    <div>
+                        <span class="section-label">DAILY BRIEF</span>
+                        <h3>ملخص اليوم</h3>
+                    </div>
+
+                    <button class="secondary-btn" id="refreshDashboard">
+                        ↻ تحديث
+                    </button>
+
+                </section>
+
+                <section class="brief-grid">
+
+                    <div class="brief-card">
+
+                        <div class="brief-icon blue-icon">♙</div>
+
+                        <div>
+                            <span>الحضور</span>
+                            <strong id="briefAttendance">...</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="brief-card">
+
+                        <div class="brief-icon orange-icon">!</div>
+
+                        <div>
+                            <span>المتابعات</span>
+                            <strong id="briefFollowups">...</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="brief-card">
+
+                        <div class="brief-icon purple-icon">☷</div>
+
+                        <div>
+                            <span>المهام</span>
+                            <strong id="briefTasks">...</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="brief-card">
+
+                        <div class="brief-icon red-icon">🔔</div>
+
+                        <div>
+                            <span>التنبيهات</span>
+                            <strong id="briefAlerts">...</strong>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- MAIN DASHBOARD GRID -->
+
+                <section class="dashboard-grid">
+
+                    <!-- ATTENTION -->
+
+                    <div class="panel attention-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <span class="section-label">ACTION CENTER</span>
+                                <h3>يحتاج انتباهك الآن</h3>
+                            </div>
+
+                            <span class="live-badge">LIVE</span>
+
+                        </div>
+
+                        <div id="attentionList" class="attention-list"></div>
+
+                    </div>
+
+
+                    <!-- AI -->
+
+                    <div class="panel ai-panel">
+
+                        <div class="ai-header">
+
+                            <div class="ai-title">
+
+                                <div class="ai-big-icon">✦</div>
+
+                                <div>
+                                    <span class="section-label">SMART ASSISTANT</span>
+                                    <h3>GROVIA AI</h3>
+                                </div>
+
+                            </div>
+
+                            <span class="ai-status">
+                                ● جاهز
+                            </span>
+
+                        </div>
+
+                        <p>
+                            اسألني عن الموظفين، الأقسام، الإجازات،
+                            المتابعات، الشركات أو المهام.
+                        </p>
+
+                        <div class="quick-questions">
+
+                            <button data-question="مين غايب النهارده؟">
+                                مين غايب النهارده؟
+                            </button>
+
+                            <button data-question="إيه اللي محتاج متابعة؟">
+                                إيه اللي محتاج متابعة؟
+                            </button>
+
+                            <button data-question="إيه المطلوب مني النهارده؟">
+                                إيه المطلوب مني؟
+                            </button>
+
+                            <button data-question="مين مسؤول عن المشروبات؟">
+                                مين مسؤول عن المشروبات؟
+                            </button>
+
+                        </div>
+
+                        <button class="ai-main-btn" id="dashboardAskAI">
+                            ✦ اسأل GROVIA AI
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- QUICK ACTIONS -->
+
+                <section class="section-heading">
+
+                    <div>
+                        <span class="section-label">QUICK ACTIONS</span>
+                        <h3>إجراءات سريعة</h3>
+                    </div>
+
+                </section>
+
+                <section class="quick-actions">
+
+                    <button class="action-card" data-action="employee">
+                        <span class="action-icon blue-icon">♙</span>
+                        <strong>إضافة موظف</strong>
+                        <small>إضافة موظف جديد للفريق</small>
+                    </button>
+
+                    <button class="action-card" data-action="absence">
+                        <span class="action-icon red-icon">×</span>
+                        <strong>تسجيل غياب</strong>
+                        <small>تسجيل غياب موظف اليوم</small>
+                    </button>
+
+                    <button class="action-card" data-action="followup">
+                        <span class="action-icon orange-icon">✓</span>
+                        <strong>متابعة جديدة</strong>
+                        <small>سجل متابعة قسم</small>
+                    </button>
+
+                    <button class="action-card" data-action="task">
+                        <span class="action-icon purple-icon">☷</span>
+                        <strong>إضافة مهمة</strong>
+                        <small>أضف مهمة للمشرف</small>
+                    </button>
+
+                    <button class="action-card" data-action="leave">
+                        <span class="action-icon green-icon">◷</span>
+                        <strong>إجازة</strong>
+                        <small>سجل إجازة موظف</small>
+                    </button>
+
+                    <button class="action-card" data-action="company">
+                        <span class="action-icon teal-icon">▣</span>
+                        <strong>شركة جديدة</strong>
+                        <small>أضف بيانات شركة</small>
+                    </button>
+
+                </section>
+
+
+                <!-- TEAM -->
+
+                <section class="section-heading">
+
+                    <div>
+                        <span class="section-label">TEAM STATUS</span>
+                        <h3>حالة الفريق</h3>
+                    </div>
+
+                    <button class="text-btn" data-page="employees">
+                        عرض الكل →
+                    </button>
+
+                </section>
+
+                <section id="dashboardEmployees" class="employee-mini-grid"></section>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- EMPLOYEES -->
+            <!-- ================================================= -->
+
+            <div class="page" id="employeesPage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">TEAM MANAGEMENT</span>
+                        <h2>الموظفين</h2>
+                        <p>
+                            إدارة بيانات الموظفين، الأقسام، المسؤوليات والحضور.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn" id="addEmployeeBtn">
+                        + إضافة موظف
+                    </button>
+
+                </div>
+
+                <div class="filter-bar">
+
+                    <div class="filter-search">
+                        🔍
+                        <input
+                            id="employeeSearch"
+                            placeholder="ابحث عن موظف..."
+                        >
+                    </div>
+
+                    <select id="departmentFilter">
+                        <option value="all">كل الأقسام</option>
+                    </select>
+
+                    <select id="statusFilter">
+                        <option value="all">كل الحالات</option>
+                        <option value="present">حاضر</option>
+                        <option value="absent">غائب</option>
+                        <option value="leave">إجازة</option>
+                    </select>
+
+                </div>
+
+                <div id="employeesGrid" class="employees-grid"></div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- FOLLOWUPS -->
+            <!-- ================================================= -->
+
+            <div class="page" id="followupsPage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">DAILY CONTROL</span>
+                        <h2>المتابعات</h2>
+                        <p>
+                            تابع نظافة وترتيب الأقسام وحالة كل منطقة.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn" id="addFollowupBtn">
+                        + متابعة جديدة
+                    </button>
+
+                </div>
+
+                <div class="progress-overview">
+
+                    <div>
+                        <span>إنجاز المتابعات اليوم</span>
+                        <strong id="followupProgressText">0%</strong>
+                    </div>
+
+                    <div class="progress">
+                        <span id="followupProgress"></span>
+                    </div>
+
+                </div>
+
+                <div id="followupsGrid" class="followups-grid"></div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- SCHEDULE -->
+            <!-- ================================================= -->
+
+            <div class="page" id="schedulePage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">ATTENDANCE & LEAVE</span>
+                        <h2>الحضور والإجازات</h2>
+                        <p>
+                            راقب الحضور، الراحة الأسبوعية والإجازات.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn" id="addLeaveBtn">
+                        + تسجيل إجازة
+                    </button>
+
+                </div>
+
+                <div class="schedule-summary">
+
+                    <div class="schedule-stat green-stat">
+                        <span>حاضر</span>
+                        <strong id="schedulePresent">0</strong>
+                    </div>
+
+                    <div class="schedule-stat red-stat">
+                        <span>غائب</span>
+                        <strong id="scheduleAbsent">0</strong>
+                    </div>
+
+                    <div class="schedule-stat purple-stat">
+                        <span>إجازة</span>
+                        <strong id="scheduleLeave">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>القسم</th>
+                                <th>الراحة</th>
+                                <th>الحالة اليوم</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="scheduleTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- COMPANIES -->
+            <!-- ================================================= -->
+
+            <div class="page" id="companiesPage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">SUPPLIER CONTROL</span>
+                        <h2>الشركات والمرتجعات</h2>
+                        <p>
+                            اعرف الشركات التي تقبل أو لا تقبل المرتجع وشروطها.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn" id="addCompanyBtn">
+                        + شركة جديدة
+                    </button>
+
+                </div>
+
+                <div class="company-summary">
+
+                    <div>
+                        <span>إجمالي الشركات</span>
+                        <strong id="totalCompanies">0</strong>
+                    </div>
+
+                    <div>
+                        <span>تقبل المرتجع</span>
+                        <strong id="returnCompanies">0</strong>
+                    </div>
+
+                    <div>
+                        <span>لا تقبل المرتجع</span>
+                        <strong id="noReturnCompanies">0</strong>
+                    </div>
+
+                </div>
+
+                <div id="companiesGrid" class="companies-grid"></div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- TASKS -->
+            <!-- ================================================= -->
+
+            <div class="page" id="tasksPage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">SUPERVISOR TASKS</span>
+                        <h2>المهام</h2>
+                        <p>
+                            نظم المهام اليومية واعرف المتأخر منها.
+                        </p>
+                    </div>
+
+                    <button class="primary-btn" id="addTaskBtn">
+                        + مهمة جديدة
+                    </button>
+
+                </div>
+
+                <div class="kanban">
+
+                    <div class="kanban-column">
+
+                        <div class="kanban-title">
+                            <span>جديدة</span>
+                            <b id="todoCount">0</b>
+                        </div>
+
+                        <div id="todoTasks"></div>
+
+                    </div>
+
+
+                    <div class="kanban-column">
+
+                        <div class="kanban-title">
+                            <span>جاري العمل</span>
+                            <b id="doingCount">0</b>
+                        </div>
+
+                        <div id="doingTasks"></div>
+
+                    </div>
+
+
+                    <div class="kanban-column">
+
+                        <div class="kanban-title">
+                            <span>مكتملة</span>
+                            <b id="doneCount">0</b>
+                        </div>
+
+                        <div id="doneTasks"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- REPORTS -->
+            <!-- ================================================= -->
+
+            <div class="page" id="reportsPage">
+
+                <div class="page-intro">
+
+                    <div>
+                        <span class="section-label">PERFORMANCE REPORT</span>
+                        <h2>التقارير</h2>
+                        <p>
+                            ملخص سريع لأداء المتابعة والإدارة.
+                        </p>
+                    </div>
+
+                    <button class="secondary-btn" id="copyReport">
+                        نسخ التقرير
+                    </button>
+
+                </div>
+
+                <div class="report-grid">
+
+                    <div class="report-score-card">
+
+                        <span>مؤشر المتابعة</span>
+
+                        <strong id="reportScore">0%</strong>
+
+                        <div class="score-ring">
+                            <div id="scoreRing"></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-card">
+
+                        <span>المتابعات المكتملة</span>
+                        <strong id="reportFollowups">0</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>المهام المكتملة</span>
+                        <strong id="reportTasks">0</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>الحضور</span>
+                        <strong id="reportAttendance">0%</strong>
+                    </div>
+
+                </div>
+
+                <div class="panel report-text-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <span class="section-label">DAILY REPORT</span>
+                            <h3>تقرير المشرف</h3>
+                        </div>
+                    </div>
+
+                    <pre id="reportText"></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- AI DRAWER -->
+<!-- ================================================= -->
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="ai-drawer" id="aiDrawer">
+
+    <div class="drawer-header">
+
+        <div>
+            <span class="section-label">GROVIA AI</span>
+            <h2>المساعد الذكي ✦</h2>
+        </div>
+
+        <button id="closeAssistant">×</button>
+
+    </div>
+
+    <div class="ai-welcome">
+
+        <div class="ai-big-icon">✦</div>
+
+        <div>
+            <strong>أنا جاهز أساعدك</strong>
+
+            <p>
+                اسألني بأي طريقة طبيعية، وأنا هحاول أوصل للمعلومة من بيانات GROVIA.
+            </p>
+        </div>
+
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-suggestions">
+
+        <button data-question="مين غايب النهارده؟">
+            مين غايب؟
+        </button>
+
+        <button data-question="مين أجازته النهارده؟">
+            مين إجازته؟
+        </button>
+
+        <button data-question="إيه المطلوب مني النهارده؟">
+            المطلوب مني؟
+        </button>
+
+        <button data-question="إيه الأقسام اللي محتاجة متابعة؟">
+            المتابعات
+        </button>
+
+    </div>
+
+    <form id="chatForm" class="chat-form">
+
+        <input
+            id="chatInput"
+            placeholder="اكتب سؤالك هنا..."
+            autocomplete="off"
+        >
+
+        <button>➤</button>
+
+    </form>
+
+</aside>
+
+
+<!-- ================================================= -->
+<!-- MODAL -->
+<!-- ================================================= -->
+
+<div class="modal-backdrop" id="modalBackdrop">
+
+    <div class="modal" id="modal">
+
+        <div class="modal-header">
+
+            <div>
+                <span class="section-label" id="modalLabel">ACTION</span>
+                <h2 id="modalTitle">إضافة</h2>
+            </div>
+
+            <button id="closeModal">×</button>
+
+        </div>
+
+        <form id="modalForm"></form>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div id="toastContainer"></div>
+
+
+<script src="js/script.js"></script>
+
+</body>
+</html>

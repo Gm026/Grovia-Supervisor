@@ -3108,3 +3108,364 @@ td{
         margin-right:auto;
     }
 }
+
+/* =========================================================
+   RESPONSIVE MOBILE UI
+========================================================= */
+
+html,
+body{
+    max-width:100%;
+    overflow-x:hidden;
+}
+
+button,
+.nav-item,
+.icon-button,
+.primary-btn,
+.secondary-btn,
+.ai-main-btn,
+.chat-suggestions button,
+.card-actions button,
+.mobile-nav-item{
+    min-height:44px;
+}
+
+.mobile-nav{
+    display:none;
+}
+
+@media(max-width:768px){
+
+    body{
+        font-size:14px;
+        padding-bottom:78px;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        width:100%;
+        margin-right:0;
+    }
+
+    .topbar{
+        position:sticky;
+        top:0;
+        z-index:80;
+        min-height:68px;
+        padding:10px 16px;
+        background:rgba(21,28,27,.96);
+        border-bottom:1px solid var(--border);
+    }
+
+    .top-title{
+        min-width:0;
+    }
+
+    .top-title h1{
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+        font-size:20px;
+    }
+
+    .top-actions{
+        flex-shrink:0;
+        gap:8px;
+    }
+
+    .global-search,
+    .profile-info,
+    .profile>span{
+        display:none;
+    }
+
+    .profile{
+        padding:0;
+        min-width:44px;
+    }
+
+    .page-container{
+        padding:22px 16px 28px;
+    }
+
+    .hero{
+        min-height:0;
+        padding:24px 20px;
+        border-radius:16px;
+    }
+
+    .hero h2{
+        max-width:100%;
+        font-size:25px;
+        line-height:1.45;
+    }
+
+    .hero p{
+        max-width:100%;
+        line-height:1.8;
+    }
+
+    .hero-decoration{
+        opacity:.45;
+    }
+
+    .kpi-grid,
+    .brief-grid,
+    .schedule-summary,
+    .company-summary,
+    .report-grid,
+    .quick-actions,
+    .employees-grid,
+    .companies-grid,
+    .followups-grid,
+    .employee-mini-grid,
+    .kanban{
+        grid-template-columns:1fr;
+        gap:12px;
+    }
+
+    .kpi-card,
+    .brief-card,
+    .panel,
+    .action-card,
+    .employee-card,
+    .company-card,
+    .follow-card,
+    .report-card,
+    .report-score-card,
+    .kanban-column{
+        border-radius:14px;
+    }
+
+    .section-heading,
+    .page-intro,
+    .panel-header,
+    .drawer-header,
+    .modal-header{
+        gap:12px;
+    }
+
+    .section-heading,
+    .page-intro{
+        align-items:flex-start;
+        flex-wrap:wrap;
+    }
+
+    .section-heading h2,
+    .page-intro h2{
+        font-size:21px;
+        line-height:1.45;
+    }
+
+    .section-heading>button,
+    .page-intro>button{
+        width:100%;
+    }
+
+    .filter-bar{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        padding:14px;
+    }
+
+    .filter-search,
+    .filter-bar select,
+    .global-search input{
+        width:100%;
+        min-height:44px;
+    }
+
+    .table-container{
+        width:100%;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .table-container table{
+        min-width:620px;
+    }
+
+    .ai-drawer{
+        width:min(100%, 430px);
+        max-width:100%;
+    }
+
+    .ai-welcome{
+        margin:14px 16px;
+        padding:16px;
+    }
+
+    .chat-messages{
+        padding:14px 16px;
+    }
+
+    .chat-suggestions{
+        display:flex;
+        gap:8px;
+        padding:10px 16px;
+        overflow-x:auto;
+        scrollbar-width:none;
+    }
+
+    .chat-suggestions::-webkit-scrollbar{
+        display:none;
+    }
+
+    .chat-suggestions button{
+        flex:0 0 auto;
+        white-space:nowrap;
+    }
+
+    .chat-form{
+        position:sticky;
+        bottom:0;
+        padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+        background:var(--surface);
+    }
+
+    .chat-form input{
+        min-height:46px;
+        font-size:16px;
+    }
+
+    .chat-form button{
+        width:46px;
+        height:46px;
+    }
+
+    .modal-backdrop{
+        align-items:flex-end;
+        padding:0;
+    }
+
+    .modal{
+        width:100%;
+        max-width:none;
+        max-height:92vh;
+        border-radius:20px 20px 0 0;
+        padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+        min-height:46px;
+        font-size:16px;
+    }
+
+    .form-group textarea{
+        min-height:110px;
+    }
+
+    .mobile-nav{
+        position:fixed;
+        right:0;
+        bottom:0;
+        left:0;
+        z-index:120;
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        gap:2px;
+        padding:7px 8px calc(7px + env(safe-area-inset-bottom));
+        background:rgba(13,20,19,.98);
+        border-top:1px solid var(--border);
+        box-shadow:0 -10px 30px rgba(0,0,0,.22);
+    }
+
+    .mobile-nav-item{
+        display:flex;
+        min-width:0;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:2px;
+        padding:4px 2px;
+        color:var(--muted);
+        background:transparent;
+        border-radius:10px;
+    }
+
+    .mobile-nav-item span{
+        font-size:19px;
+        line-height:1;
+    }
+
+    .mobile-nav-item small{
+        overflow:hidden;
+        max-width:100%;
+        font-size:10px;
+        line-height:1.4;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .mobile-nav-item.active{
+        color:var(--teal);
+        background:rgba(22,184,166,.12);
+    }
+
+    .mobile-nav-ai span{
+        color:var(--orange);
+    }
+}
+
+@media(max-width:480px){
+
+    .topbar{
+        padding-inline:12px;
+    }
+
+    .page-container{
+        padding:16px 12px 24px;
+    }
+
+    .hero{
+        padding:20px 16px;
+    }
+
+    .hero h2{
+        font-size:22px;
+    }
+
+    .hero p{
+        font-size:13px;
+    }
+
+    .kpi-card{
+        padding:16px;
+    }
+
+    .kpi-card>strong{
+        font-size:28px;
+    }
+
+    .panel{
+        padding:14px;
+    }
+
+    .panel-header{
+        align-items:flex-start;
+    }
+
+    .panel-header .live-badge{
+        flex-shrink:0;
+    }
+
+    .action-card{
+        min-height:92px;
+        padding:14px;
+    }
+
+    .mobile-nav{
+        padding-inline:4px;
+    }
+
+    .mobile-nav-item small{
+        font-size:9px;
+    }
+}

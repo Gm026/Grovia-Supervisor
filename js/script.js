@@ -345,6 +345,10 @@ function navigate(page) {
     item.classList.toggle("active", item.dataset.page === page);
   });
 
+  $$(".mobile-nav-item[data-page]").forEach((item) => {
+    item.classList.toggle("active", item.dataset.page === page);
+  });
+
   $("#pageTitle").textContent = pageNames[page] || "GROVIA";
 
   window.scrollTo({
@@ -1297,7 +1301,7 @@ function closeAssistant() {
 
 $("#openAssistant").addEventListener("click", openAssistant);
 
-$("#dashboardAskAI").addEventListener("click", openAssistant);
+$("#mobileOpenAssistant")?.addEventListener("click", openAssistant);
 
 $("#closeAssistant").addEventListener("click", closeAssistant);
 

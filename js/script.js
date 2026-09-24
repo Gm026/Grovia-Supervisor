@@ -2050,6 +2050,8 @@ setTimeout(() => {
 // GROVIA REAL AI CONNECTION
 // ============================================
 
+const AI_ENDPOINT = "/api/ai";
+
 async function askGroviaAI(message) {
     if (!message || !message.trim()) {
         return {
@@ -2068,7 +2070,7 @@ async function askGroviaAI(message) {
             tasks: Array.isArray(data?.tasks) ? data.tasks : []
         };
 
-        const response = await fetch("/api/ai", {
+        const response = await fetch(AI_ENDPOINT, {
             method: "POST",
 
             headers: {
@@ -2111,7 +2113,7 @@ async function askGroviaAI(message) {
                 ok: false,
                 text:
                     "مش قادر أوصل للـAI حالياً. " +
-                    "اتأكد إن السيرفر شغال على localhost:3000."
+                    "اتأكد إن الاتصال بالسيرفر شغال."
             };
         }
     }

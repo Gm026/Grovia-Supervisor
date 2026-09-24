@@ -2,9 +2,12 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 // ===============================
 // MIDDLEWARE
@@ -19,7 +22,10 @@ app.use(
 );
 
 // Serve the GROVIA frontend
-app.use(express.static(process.cwd()));
+app.use(express.static(ROOT_DIR));
+app.get("/", (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, "index.html"));
+});
 
 // ===============================
 // OPENAI

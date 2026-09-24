@@ -8,6 +8,9 @@ import { fileURLToPath } from "node:url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const GROQ_MODEL =
+    process.env.GROQ_MODEL ||
+    "llama-3.1-8b-instant";
 
 function getSafeErrorMessage(error) {
 
@@ -343,8 +346,7 @@ app.post("/api/ai", async (req, res) => {
             await groq.chat.completions.create({
 
                 model:
-                    process.env.GROQ_MODEL ||
-                    "llama-3.3-70b-versatile",
+                    GROQ_MODEL,
 
                 messages,
 
@@ -445,8 +447,7 @@ app.post("/api/ai", async (req, res) => {
                 await groq.chat.completions.create({
 
                     model:
-                        process.env.GROQ_MODEL ||
-                        "llama-3.3-70b-versatile",
+                        GROQ_MODEL,
 
                     messages: [
                         ...messages,

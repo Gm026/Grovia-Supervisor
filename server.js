@@ -26,6 +26,12 @@ app.use(express.static(ROOT_DIR));
 app.get("/", (req, res) => {
     res.sendFile(path.join(ROOT_DIR, "index.html"));
 });
+app.get("/css/styles.css", (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, "css", "style.css"));
+});
+app.get("/js/app.js", (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, "js", "script.js"));
+});
 
 // ===============================
 // OPENAI

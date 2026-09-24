@@ -772,28 +772,28 @@ function renderEmployees() {
 
                     <button
                         class="employee-edit-btn"
-                        onclick="editEmployee(${employee.id})">
+                        onclick="editEmployee('${escapeHTML(String(employee.id))}')">
                         تعديل
                     </button>
 
                     <button
                         class="employee-delete-btn"
-                        onclick="deleteEmployee(${employee.id})">
+                        onclick="deleteEmployee('${escapeHTML(String(employee.id))}')">
                         حذف
                     </button>
 
                     <button
-                        onclick="changeEmployeeStatus(${employee.id},'present')">
+                        onclick="changeEmployeeStatus('${escapeHTML(String(employee.id))}','present')">
                         حاضر
                     </button>
 
                     <button
-                        onclick="changeEmployeeStatus(${employee.id},'absent')">
+                        onclick="changeEmployeeStatus('${escapeHTML(String(employee.id))}','absent')">
                         غياب
                     </button>
 
                     <button
-                        onclick="changeEmployeeStatus(${employee.id},'leave')">
+                        onclick="changeEmployeeStatus('${escapeHTML(String(employee.id))}','leave')">
                         إجازة
                     </button>
 
@@ -925,7 +925,7 @@ function renderFollowups() {
                                     ${value ? "checked" : ""}
                                     onchange="
                                         toggleFollowup(
-                                            ${followup.id},
+                                            '${escapeHTML(String(followup.id))}',
                                             '${key}'
                                         )
                                     "
@@ -1057,7 +1057,7 @@ function renderSchedule() {
                         class="table-action"
                         onclick="
                             changeEmployeeStatus(
-                                ${employee.id},
+                                '${escapeHTML(String(employee.id))}',
                                 'present'
                             )
                         "
@@ -1069,7 +1069,7 @@ function renderSchedule() {
                         class="table-action"
                         onclick="
                             changeEmployeeStatus(
-                                ${employee.id},
+                                '${escapeHTML(String(employee.id))}',
                                 'absent'
                             )
                         "
@@ -1287,7 +1287,7 @@ function taskHTML(task) {
                         ? `<button
                             onclick="
                                 changeTaskStatus(
-                                    ${task.id},
+                                    '${escapeHTML(String(task.id))}',
                                     'doing'
                                 )
                             "
@@ -1297,7 +1297,7 @@ function taskHTML(task) {
                         : `<button
                             onclick="
                                 changeTaskStatus(
-                                    ${task.id},
+                                    '${escapeHTML(String(task.id))}',
                                     'done'
                                 )
                             "

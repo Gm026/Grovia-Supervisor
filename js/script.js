@@ -400,6 +400,28 @@ function currentDate() {
   }).format(new Date());
 }
 
+function timeGreeting(date = new Date()) {
+  const hour = date.getHours();
+
+  if (hour >= 5 && hour < 12) return "صباح الخير";
+  if (hour >= 12 && hour < 18) return "مساء الخير";
+  if (hour >= 18) return "مساء النور";
+  return "ليلة سعيدة";
+}
+
+function updateDashboardHeader(date = new Date()) {
+  const greeting = $("#heroGreeting");
+  const dateElement = $("#currentDate");
+
+  if (greeting) {
+    greeting.textContent = `${timeGreeting(date)} يا أ/محمد رضا 👋`;
+  }
+
+  if (dateElement) {
+    dateElement.textContent = currentDate();
+  }
+}
+
 function getEmployee(id) {
   return data.employees.find((employee) => employee.id == id);
 }
@@ -519,7 +541,7 @@ function renderDashboard() {
 
   updateNotificationCount();
 
-  $("#currentDate").textContent = currentDate();
+  updateDashboardHeader();
 }
 
 /* =========================================================
@@ -2327,6 +2349,22 @@ function renderAll() {
 /* =========================================================
    INITIALIZE
 ========================================================= */
+
+function refreshDashboardHeader() {
+  updateDashboardHeader(new Date());
+}
+
+document.addEventListener("DOMContentLoaded", refreshDashboardHeader, {
+  once: true,
+});
+
+window.addEventListener("focus", refreshDashboardHeader);
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshDashboardHeader();
+});
+
+window.setInterval(refreshDashboardHeader, 60 * 1000);
 
 renderAll();
 

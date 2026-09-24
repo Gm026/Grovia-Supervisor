@@ -2100,21 +2100,16 @@ async function askGroviaAI(message) {
 
         console.error("GROVIA AI ERROR:", error);
 
-        // لو الـAPI مش شغال، نرجع للـAI المحلي
-        // عشان البرنامج يفضل شغال
-        try {
-            return {
-                ok: true,
-                text: aiAnswer(message)
-            };
-        } catch (fallbackError) {
+        const reason =
+            error instanceof Error && error.message
+                ? error.message
+                : "سبب غير معروف";
 
-            return {
-                ok: false,
-                text:
-                    "مش قادر أوصل للـAI حالياً. " +
-                    "اتأكد إن الاتصال بالسيرفر شغال."
-            };
-        }
+        return {
+            ok: false,
+            text:
+                "مش قادر أوصل للـAI حالياً. السبب: " +
+                reason
+        };
     }
 }

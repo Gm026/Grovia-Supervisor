@@ -9,6 +9,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
+function getSafeErrorMessage(error) {
+
+    const message =
+        error?.message ||
+        "حصل خطأ أثناء الاتصال بالـAI";
+
+    return String(message)
+        .replace(/sk-[^\s"'`]+/g, "[redacted]")
+        .slice(0, 300);
+}
+
 // ===============================
 // MIDDLEWARE
 // ===============================
@@ -336,7 +347,7 @@ app.post("/api/ai", async (req, res) => {
 
                 model:
                     process.env.OPENAI_MODEL ||
-                    "gpt-5.6-luna",
+                    "gpt-4o-mini",
 
                 input,
 
@@ -445,7 +456,7 @@ app.post("/api/ai", async (req, res) => {
 
                     model:
                         process.env.OPENAI_MODEL ||
-                        "gpt-5.6-luna",
+                        "gpt-4o-mini",
 
                     previous_response_id:
                         response.id,
@@ -484,8 +495,7 @@ app.post("/api/ai", async (req, res) => {
             ok: false,
 
             error:
-                error?.message ||
-                "حصل خطأ أثناء الاتصال بالـAI"
+                getSafeErrorMessage(error)
         });
     }
 });

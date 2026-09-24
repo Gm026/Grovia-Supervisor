@@ -8,9 +8,6 @@ import { fileURLToPath } from "node:url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const GROQ_MODEL =
-    process.env.GROQ_MODEL ||
-    "llama-3.1-8b-instant";
 
 function getSafeErrorMessage(error) {
 
@@ -52,6 +49,7 @@ app.get("/js/app.js", (req, res) => {
 // ===============================
 
 let client;
+let modelPromise;
 
 function getGroqClient() {
 
@@ -64,6 +62,32 @@ function getGroqClient() {
     }
 
     return client;
+}
+
+async function getGroqModel(groq) {
+
+    if (process.env.GROQ_MODEL) {
+        return process.env.GROQ_MODEL;
+    }
+
+    if (!modelPromise) {
+        modelPromise = groq.models.list().then((page) => {
+            const excludedModel = /whisper|tts|speech|audio|embed|guard|safety|moderation|prompt-guard/i;
+            const model = page.data.find((item) =>
+                item?.id && !excludedModel.test(item.id)
+            );
+
+            if (!model) {
+                throw new Error(
+                    "لم يعثر Groq على موديل محادثة متاح للحساب. اضبط GROQ_MODEL يدويًا."
+                );
+            }
+
+            return model.id;
+        });
+    }
+
+    return modelPromise;
 }
 
 // ===============================
@@ -268,6 +292,8 @@ app.post("/api/ai", async (req, res) => {
             });
         }
 
+        const model = await getGroqModel(groq);
+
         // -------------------------------
         // USER MESSAGE
         // -------------------------------
@@ -346,7 +372,7 @@ app.post("/api/ai", async (req, res) => {
             await groq.chat.completions.create({
 
                 model:
-                    GROQ_MODEL,
+                    model,
 
                 messages,
 
@@ -447,7 +473,7 @@ app.post("/api/ai", async (req, res) => {
                 await groq.chat.completions.create({
 
                     model:
-                        GROQ_MODEL,
+                        model,
 
                     messages: [
                         ...messages,

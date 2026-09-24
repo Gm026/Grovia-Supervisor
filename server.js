@@ -25,9 +25,19 @@ app.use(express.static(process.cwd()));
 // OPENAI
 // ===============================
 
-const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+let client;
+
+function getOpenAIClient() {
+
+    if (!client && process.env.OPENAI_API_KEY) {
+
+        client = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+        });
+    }
+
+    return client;
+}
 
 // ===============================
 // GROVIA AI TOOLS
@@ -222,7 +232,9 @@ app.post("/api/ai", async (req, res) => {
         // CHECK API KEY
         // -------------------------------
 
-        if (!process.env.OPENAI_API_KEY) {
+        const openai = getOpenAIClient();
+
+        if (!openai) {
 
             return res.status(500).json({
 
@@ -308,7 +320,7 @@ app.post("/api/ai", async (req, res) => {
         // -------------------------------
 
         let response =
-            await client.responses.create({
+            await openai.responses.create({
 
                 model:
                     process.env.OPENAI_MODEL ||
@@ -417,7 +429,7 @@ app.post("/api/ai", async (req, res) => {
         ) {
 
             response =
-                await client.responses.create({
+                await openai.responses.create({
 
                     model:
                         process.env.OPENAI_MODEL ||

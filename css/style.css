@@ -4274,3 +4274,104 @@ textarea:focus{
         transition-duration:.01ms !important;
     }
 }
+
+/* =========================================================
+   BLACK NEON FINISH
+========================================================= */
+
+:root{
+    --bg:#020308;
+    --bg-2:#050711;
+    --surface:#0b0d16;
+    --surface-2:#101321;
+    --surface-3:#171b2d;
+    --border:rgba(255,255,255,.16);
+    --border-light:rgba(255,255,255,.3);
+    --text:#ffffff;
+    --text-2:#d8def0;
+    --muted:#9099b4;
+    --shadow:0 26px 90px rgba(0,0,0,.5);
+}
+
+body{
+    background:
+        radial-gradient(circle at 8% 0%, rgba(133,70,255,.22), transparent 24rem),
+        radial-gradient(circle at 92% 12%, rgba(25,222,197,.15), transparent 25rem),
+        #020308;
+}
+
+body::before{
+    opacity:.18;
+    background-image:
+        radial-gradient(circle, rgba(255,255,255,.55) 1px, transparent 1.5px),
+        linear-gradient(rgba(102,126,255,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(102,126,255,.12) 1px, transparent 1px);
+    background-position:0 0, 0 0, 0 0;
+    background-size:34px 34px, 68px 68px, 68px 68px;
+}
+
+body::after{
+    opacity:.62;
+    background:
+        radial-gradient(ellipse at 15% 25%, rgba(126,74,255,.16), transparent 28%),
+        radial-gradient(ellipse at 80% 60%, rgba(19,225,199,.12), transparent 25%),
+        radial-gradient(ellipse at 50% 5%, rgba(74,103,255,.14), transparent 24%);
+    animation-duration:24s;
+}
+
+.sidebar{
+    background:linear-gradient(180deg, #03040a, #080b16);
+}
+
+.topbar{
+    background:rgba(2,3,8,.78);
+}
+
+.kpi-card,
+.brief-card,
+.panel,
+.action-card,
+.employee-card,
+.company-card,
+.follow-card,
+.report-card,
+.report-score-card,
+.kanban-column{
+    background:linear-gradient(145deg, rgba(20,23,38,.78), rgba(7,9,16,.9));
+    border-color:rgba(255,255,255,.17);
+    box-shadow:0 18px 55px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.06);
+}
+
+.kpi-card:hover,
+.brief-card:hover,
+.action-card:hover,
+.employee-card:hover,
+.company-card:hover,
+.follow-card:hover{
+    border-color:rgba(107,239,215,.55);
+    box-shadow:0 20px 58px rgba(0,0,0,.44), 0 0 28px rgba(125,79,255,.14);
+}
+
+.employee-edit-btn{
+    color:#bcaeff;
+    border-color:rgba(157,124,255,.4);
+    background:rgba(111,77,255,.14);
+}
+
+.employee-delete-btn{
+    color:#ff91a9;
+    border-color:rgba(255,104,137,.4);
+    background:rgba(255,74,109,.1);
+}
+
+.employee-edit-btn:hover,
+.employee-delete-btn:hover{
+    filter:brightness(1.2);
+    box-shadow:0 0 18px rgba(157,124,255,.16);
+}
+
+@media(max-width:480px){
+    .card-actions{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}

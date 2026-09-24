@@ -647,6 +647,18 @@ function renderEmployees() {
                 <div class="card-actions">
 
                     <button
+                        class="employee-edit-btn"
+                        onclick="editEmployee(${employee.id})">
+                        تعديل
+                    </button>
+
+                    <button
+                        class="employee-delete-btn"
+                        onclick="deleteEmployee(${employee.id})">
+                        حذف
+                    </button>
+
+                    <button
                         onclick="changeEmployeeStatus(${employee.id},'present')">
                         حاضر
                     </button>
@@ -1442,6 +1454,7 @@ function openModal(title, label, fields, onSubmit) {
                         type="${field.type || "text"}"
                         name="${field.name}"
                         placeholder="${field.placeholder || ""}"
+                        value="${escapeHTML(field.value || "")}"
                         ${field.required ? "required" : ""}
                     >`
                 }
@@ -1526,9 +1539,9 @@ function openActionModal(action) {
 
 /* EMPLOYEE */
 
-function openEmployeeModal() {
+function openEmployeeModal(employee = null) {
   openModal(
-    "إضافة موظف",
+    employee ? "تعديل بيانات الموظف" : "إضافة موظف",
 
     "TEAM",
 
@@ -1536,51 +1549,87 @@ function openEmployeeModal() {
       {
         name: "name",
         label: "اسم الموظف",
+        value: employee?.name,
         required: true,
       },
 
       {
         name: "department",
         label: "القسم",
+        value: employee?.department,
         required: true,
       },
 
       {
         name: "role",
         label: "المسؤولية",
+        value: employee?.role,
         required: true,
       },
 
       {
         name: "rest",
         label: "يوم الراحة",
+        value: employee?.rest,
         required: true,
       },
     ],
 
     (values) => {
-      data.employees.push({
-        id: Date.now(),
+      const employeeData = {
+        name: values.name.trim(),
+        department: values.department.trim(),
+        role: values.role.trim(),
+        rest: values.rest.trim(),
+      };
 
-        name: values.name,
+      if (Object.values(employeeData).some((value) => !value)) {
+        toast("من فضلك أكمل بيانات الموظف");
+        return;
+      }
 
-        department: values.department,
-
-        role: values.role,
-
-        rest: values.rest,
-
-        status: "present",
-      });
+      if (employee) {
+        Object.assign(employee, employeeData);
+      } else {
+        data.employees.push({
+          id: Date.now(),
+          ...employeeData,
+          status: "present",
+        });
+      }
 
       saveData();
 
-      toast("تم إضافة الموظف ✓");
+      toast(employee ? "تم تحديث بيانات الموظف ✓" : "تم إضافة الموظف ✓");
     },
   );
 }
 
 $("#addEmployeeBtn").addEventListener("click", openEmployeeModal);
+
+function editEmployee(id) {
+  const employee = getEmployee(id);
+
+  if (employee) {
+    openEmployeeModal(employee);
+  }
+}
+
+function deleteEmployee(id) {
+  const employee = getEmployee(id);
+
+  if (!employee) return;
+
+  const confirmed = window.confirm(
+    `هل أنت متأكد من حذف الموظف "${employee.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+  );
+
+  if (!confirmed) return;
+
+  data.employees = data.employees.filter((item) => item.id != id);
+  saveData();
+  toast(`تم حذف ${employee.name} ✓`);
+}
 
 /* ABSENCE */
 

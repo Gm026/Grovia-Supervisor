@@ -83,7 +83,14 @@ async function getGroqModel(groq) {
                 );
             }
 
-            return model.id;
+            return {
+                id: model.id,
+                supportsTools: Boolean(
+                    model.supported_features?.includes("tools") ||
+                    model.capabilities?.tools ||
+                    model.supports_tools
+                )
+            };
         });
     }
 
@@ -341,7 +348,13 @@ app.post("/api/ai", async (req, res) => {
                 role: "system",
 
                 content:
-                    SYSTEM_PROMPT
+                    `${SYSTEM_PROMPT}
+
+بيانات GROVIA الحالية:
+${JSON.stringify(snapshot)}
+
+إذا لم تكن أدوات استدعاء الدوال متاحة، استخدم هذه البيانات للإجابة مباشرة.
+لا تدّعي حفظ أي تعديل؛ اطلب من المشرف استخدام نماذج GROVIA لتسجيل التغييرات.`
             },
 
             ...history.map((item) => ({
@@ -371,14 +384,12 @@ app.post("/api/ai", async (req, res) => {
         let response =
             await groq.chat.completions.create({
 
-                model:
-                    model,
+                model: model.id,
 
-                messages,
+                    messages,
 
-                tools,
+                    ...(model.supportsTools ? { tools, tool_choice: "auto" } : {}),
 
-                tool_choice: "auto"
             });
 
         // -------------------------------
@@ -472,8 +483,7 @@ app.post("/api/ai", async (req, res) => {
             response =
                 await groq.chat.completions.create({
 
-                    model:
-                        model,
+                    model: model.id,
 
                     messages: [
                         ...messages,

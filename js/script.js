@@ -238,24 +238,126 @@ const defaultData = {
 
 let data = loadData();
 
+let idSequence = 0;
+
+function createId() {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  idSequence += 1;
+  return `${Date.now()}-${idSequence}`;
+}
+
+function cloneDefaultData() {
+  return JSON.parse(JSON.stringify(defaultData));
+}
+
+function normalizeData(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const fallback = cloneDefaultData();
+  const collections = ["employees", "followups", "companies", "tasks"];
+
+  collections.forEach((key) => {
+    if (!Array.isArray(source[key])) {
+      source[key] = fallback[key];
+    }
+  });
+
+  const usedIds = new Set();
+  collections.forEach((key) => {
+    source[key] = source[key]
+      .filter((item) => item && typeof item === "object")
+      .map((item) => {
+        const normalized = { ...item };
+        const candidate = String(normalized.id ?? "");
+        normalized.id =
+          candidate && !usedIds.has(candidate) ? normalized.id : createId();
+        usedIds.add(String(normalized.id));
+        return normalized;
+      });
+  });
+
+  source.employees = source.employees
+    .filter((employee) => employee.name || employee.department)
+    .map((employee) => ({
+      ...employee,
+      name: String(employee.name || "").trim(),
+      department: String(employee.department || "").trim(),
+      role: String(employee.role || "").trim(),
+      rest: String(employee.rest || "").trim(),
+      status: ["present", "absent", "leave"].includes(employee.status)
+        ? employee.status
+        : "present",
+    }));
+
+  source.followups = source.followups
+    .filter((followup) => followup.department || followup.responsible)
+    .map((followup) => ({
+      ...followup,
+      department: String(followup.department || "").trim(),
+      responsible: String(followup.responsible || "").trim(),
+      checks: {
+        cleanliness: Boolean(followup.checks?.cleanliness),
+        arrangement: Boolean(followup.checks?.arrangement),
+        prices: Boolean(followup.checks?.prices),
+        expiry: Boolean(followup.checks?.expiry),
+      },
+    }));
+
+  source.companies = source.companies
+    .filter((company) => company.name)
+    .map((company) => ({
+      ...company,
+      name: String(company.name || "").trim(),
+      returns: Boolean(company.returns),
+      items: String(company.items || "").trim(),
+      note: String(company.note || "").trim(),
+    }));
+
+  source.tasks = source.tasks
+    .filter((task) => task.title)
+    .map((task) => ({
+      ...task,
+      title: String(task.title || "").trim(),
+      description: String(task.description || "").trim(),
+      status: ["todo", "doing", "done"].includes(task.status)
+        ? task.status
+        : "todo",
+      priority: ["high", "medium", "low"].includes(task.priority)
+        ? task.priority
+        : "medium",
+    }));
+
+  return source;
+}
+
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
   if (saved) {
     try {
-      return JSON.parse(saved);
+      return normalizeData(JSON.parse(saved));
     } catch (error) {
-      console.error(error);
+      console.error("Unable to restore saved GROVIA data:", error);
     }
   }
 
-  return JSON.parse(JSON.stringify(defaultData));
+  return cloneDefaultData();
 }
 
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    data = normalizeData(data);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error("Unable to save GROVIA data:", error);
+    toast("تعذر حفظ التعديل. حاول مرة أخرى.");
+    return false;
+  }
 
   renderAll();
+  return true;
 }
 
 /* =========================================================
@@ -829,7 +931,10 @@ function renderFollowups() {
                                 : "تحتاج متابعة"
                             }
                         </strong>
+                    </div>
 
+                    <div class="card-actions">
+                        <button onclick="deleteFollowup('${followup.id}')">حذف</button>
                     </div>
 
                 </article>
@@ -855,6 +960,16 @@ function toggleFollowup(id, key) {
   saveData();
 
   toast("تم تحديث المتابعة ✓");
+}
+
+function deleteFollowup(id) {
+  const followup = data.followups.find((item) => item.id == id);
+  if (!followup) return;
+
+  if (!window.confirm(`حذف متابعة قسم "${followup.department}"؟`)) return;
+
+  data.followups = data.followups.filter((item) => item.id != id);
+  if (saveData()) toast("تم حذف المتابعة ✓");
 }
 
 /* =========================================================
@@ -1014,11 +1129,68 @@ function renderCompanies() {
 
                 </div>
 
+                <div class="card-actions">
+                    <button onclick="editCompany('${company.id}')">تعديل</button>
+                    <button class="employee-delete-btn" onclick="deleteCompany('${company.id}')">حذف</button>
+                </div>
+
             </article>
 
         `,
     )
     .join("");
+}
+
+function editCompany(id) {
+  const company = data.companies.find((item) => item.id == id);
+  if (!company) return;
+
+  openModal(
+    "تعديل بيانات الشركة",
+    "SUPPLIER",
+    [
+      { name: "name", label: "اسم الشركة", value: company.name, required: true },
+      {
+        name: "returns",
+        label: "المرتجع",
+        type: "select",
+        value: String(company.returns),
+        options: [
+          { value: "true", label: "تقبل المرتجع" },
+          { value: "false", label: "لا تقبل المرتجع" },
+        ],
+      },
+      { name: "items", label: "المنتجات", value: company.items },
+      { name: "note", label: "ملاحظات", type: "textarea", value: company.note },
+    ],
+    (values) => {
+      const name = values.name.trim();
+      if (!name) {
+        toast("من فضلك اكتب اسم الشركة");
+        return false;
+      }
+
+      Object.assign(company, {
+        name,
+        returns: values.returns === "true",
+        items: values.items?.trim() || "",
+        note: values.note?.trim() || "",
+      });
+
+      if (saveData()) toast("تم تحديث بيانات الشركة ✓");
+      return true;
+    },
+  );
+}
+
+function deleteCompany(id) {
+  const company = data.companies.find((item) => item.id == id);
+  if (!company) return;
+
+  if (!window.confirm(`حذف الشركة "${company.name}"؟`)) return;
+
+  data.companies = data.companies.filter((item) => item.id != id);
+  if (saveData()) toast("تم حذف الشركة ✓");
 }
 
 /* =========================================================
@@ -1116,6 +1288,11 @@ function taskHTML(task) {
                 : ""
             }
 
+            <div class="card-actions">
+                <button onclick="editTask('${task.id}')">تعديل</button>
+                <button class="employee-delete-btn" onclick="deleteTask('${task.id}')">حذف</button>
+            </div>
+
         </article>
 
     `;
@@ -1131,6 +1308,74 @@ function changeTaskStatus(id, status) {
   saveData();
 
   toast("تم تحديث المهمة ✓");
+}
+
+function editTask(id) {
+  const task = data.tasks.find((item) => item.id == id);
+  if (!task) return;
+
+  openModal(
+    "تعديل المهمة",
+    "TASK",
+    [
+      { name: "title", label: "اسم المهمة", value: task.title, required: true },
+      {
+        name: "description",
+        label: "الوصف",
+        type: "textarea",
+        value: task.description,
+      },
+      {
+        name: "priority",
+        label: "الأولوية",
+        type: "select",
+        value: task.priority,
+        options: [
+          { value: "high", label: "عالية" },
+          { value: "medium", label: "متوسطة" },
+          { value: "low", label: "منخفضة" },
+        ],
+      },
+      {
+        name: "status",
+        label: "الحالة",
+        type: "select",
+        value: task.status,
+        options: [
+          { value: "todo", label: "جديدة" },
+          { value: "doing", label: "جاري العمل" },
+          { value: "done", label: "مكتملة" },
+        ],
+      },
+    ],
+    (values) => {
+      const title = values.title.trim();
+      if (!title) {
+        toast("من فضلك اكتب اسم المهمة");
+        return false;
+      }
+
+      Object.assign(task, {
+        title,
+        description: values.description?.trim() || "",
+        priority: values.priority,
+        status: values.status,
+      });
+
+      if (saveData()) toast("تم تحديث المهمة ✓");
+      return true;
+    },
+  );
+}
+
+function deleteTask(id) {
+  const task = data.tasks.find((item) => item.id == id);
+  if (!task) return;
+
+  if (!window.confirm(`حذف المهمة "${task.title}"؟`)) return;
+
+  data.tasks = data.tasks.filter((item) => item.id != id);
+  if (saveData()) toast("تم حذف المهمة ✓");
 }
 
 /* =========================================================
@@ -1224,50 +1469,36 @@ function normalize(text) {
     .trim();
 }
 
-document.querySelectorAll("[data-question]").forEach(button => {
+document.querySelectorAll("[data-question]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const question = button.dataset.question;
 
-    button.addEventListener("click", async () => {
+    if (!question) return;
 
-        const question = button.dataset.question;
+    openAssistant();
+    addMessage(question, "user");
+    addMessage("⏳ بفكر...", "ai");
 
-        if (!question) return;
+    try {
+      const result = await askGroviaAI(question);
+      const messages = $("#chatMessages");
 
-        addMessage(question, "user");
+      if (messages?.lastElementChild) {
+        messages.removeChild(messages.lastElementChild);
+      }
 
-        addMessage("⏳ بفكر...", "ai");
+      addMessage(result?.text || "مفيش رد.", "ai");
+    } catch (error) {
+      console.error(error);
+      const messages = $("#chatMessages");
 
-        try {
+      if (messages?.lastElementChild) {
+        messages.removeChild(messages.lastElementChild);
+      }
 
-            const result = await askGroviaAI(question);
-
-            const messages = $("#chatMessages");
-
-            if (messages && messages.lastElementChild) {
-                messages.removeChild(messages.lastElementChild);
-            }
-
-            addMessage(
-                result?.text || "مفيش رد.",
-                "ai"
-            );
-
-        } catch (error) {
-
-            console.error(error);
-
-            const messages = $("#chatMessages");
-
-            if (messages && messages.lastElementChild) {
-                messages.removeChild(messages.lastElementChild);
-            }
-
-            addMessage(
-                "حصلت مشكلة في الاتصال بالـAI.",
-                "ai"
-            );
-        }
-    });
-
+      addMessage("حصلت مشكلة في الاتصال بالـAI.", "ai");
+    }
+  });
 });
 
 function findEmployeeByQuestion(q) {
@@ -1385,20 +1616,6 @@ $("#chatForm").addEventListener("submit", async (event) => {
     }
 });
 
-$$("[data-question]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const question = button.dataset.question;
-
-    openAssistant();
-
-    addMessage(question, "user");
-
-    setTimeout(() => {
-      addMessage(aiAnswer(question), "ai");
-    }, 250);
-  });
-});
-
 /* =========================================================
    QUICK ACTIONS
 ========================================================= */
@@ -1435,7 +1652,7 @@ function openModal(title, label, fields, onSubmit) {
                         name="${field.name}"
                         placeholder="${field.placeholder || ""}"
                         ${field.required ? "required" : ""}
-                    ></textarea>`
+                    >${escapeHTML(field.value || "")}</textarea>`
                     : field.type === "select"
                       ? `<select
                         name="${field.name}"
@@ -1444,7 +1661,11 @@ function openModal(title, label, fields, onSubmit) {
                         ${field.options
                           .map(
                             (option) =>
-                              `<option value="${escapeHTML(option.value)}">
+                              `<option value="${escapeHTML(option.value)}" ${
+                                String(option.value) === String(field.value)
+                                  ? "selected"
+                                  : ""
+                              }>
                                     ${escapeHTML(option.label)}
                                 </option>`,
                           )
@@ -1464,22 +1685,33 @@ function openModal(title, label, fields, onSubmit) {
         `,
       )
       .join("") +
-    `<button class="form-submit">
+    `<button type="submit" class="form-submit">
             حفظ
         </button>`;
 
   $("#modalBackdrop").classList.add("show");
 
+  let submitting = false;
+
   $("#modalForm").onsubmit = (event) => {
     event.preventDefault();
+    if (submitting) return;
 
     const formData = new FormData(event.target);
 
     const values = Object.fromEntries(formData.entries());
 
-    onSubmit(values);
+    submitting = true;
+    const submitButton = event.target.querySelector(".form-submit");
+    if (submitButton) submitButton.disabled = true;
 
-    closeModal();
+    try {
+      const result = onSubmit(values);
+      if (result !== false) closeModal();
+    } finally {
+      submitting = false;
+      if (submitButton) submitButton.disabled = false;
+    }
   };
 }
 
@@ -1585,14 +1817,14 @@ function openEmployeeModal(employee = null) {
 
       if (Object.values(employeeData).some((value) => !value)) {
         toast("من فضلك أكمل بيانات الموظف");
-        return;
+        return false;
       }
 
       if (employee) {
         Object.assign(employee, employeeData);
       } else {
         data.employees.push({
-          id: Date.now(),
+          id: createId(),
           ...employeeData,
           status: "present",
         });
@@ -1601,6 +1833,7 @@ function openEmployeeModal(employee = null) {
       saveData();
 
       toast(employee ? "تم تحديث بيانات الموظف ✓" : "تم إضافة الموظف ✓");
+      return true;
     },
   );
 }
@@ -1710,12 +1943,20 @@ function openFollowupModal() {
     ],
 
     (values) => {
+      const department = values.department.trim();
+      const responsible = values.responsible.trim();
+
+      if (!department || !responsible) {
+        toast("من فضلك أكمل بيانات المتابعة");
+        return false;
+      }
+
       data.followups.push({
-        id: Date.now(),
+        id: createId(),
 
-        department: values.department,
+        department,
 
-        responsible: values.responsible,
+        responsible,
 
         checks: {
           cleanliness: false,
@@ -1728,6 +1969,7 @@ function openFollowupModal() {
       saveData();
 
       toast("تم إضافة المتابعة ✓");
+      return true;
     },
   );
 }
@@ -1778,12 +2020,19 @@ function openTaskModal() {
     ],
 
     (values) => {
+      const title = values.title.trim();
+
+      if (!title) {
+        toast("من فضلك اكتب اسم المهمة");
+        return false;
+      }
+
       data.tasks.push({
-        id: Date.now(),
+        id: createId(),
 
-        title: values.title,
+        title,
 
-        description: values.description || "",
+        description: values.description?.trim() || "",
 
         status: "todo",
 
@@ -1793,6 +2042,7 @@ function openTaskModal() {
       saveData();
 
       toast("تم إضافة المهمة ✓");
+      return true;
     },
   );
 }
@@ -1836,7 +2086,11 @@ function openLeaveModal() {
         saveData();
 
         toast(`تم تسجيل إجازة ${employee.name}`);
+        return true;
       }
+
+      toast("الموظف غير موجود");
+      return false;
     },
   );
 }
@@ -1888,21 +2142,29 @@ function openCompanyModal() {
     ],
 
     (values) => {
-      data.companies.push({
-        id: Date.now(),
+      const name = values.name.trim();
 
-        name: values.name,
+      if (!name) {
+        toast("من فضلك اكتب اسم الشركة");
+        return false;
+      }
+
+      data.companies.push({
+        id: createId(),
+
+        name,
 
         returns: values.returns === "true",
 
-        items: values.items || "",
+        items: values.items?.trim() || "",
 
-        note: values.note || "",
+        note: values.note?.trim() || "",
       });
 
       saveData();
 
       toast("تم إضافة الشركة ✓");
+      return true;
     },
   );
 }

@@ -1852,7 +1852,7 @@ function openEmployeeModal(employee = null) {
         });
       }
 
-      saveData();
+      if (!saveData()) return false;
 
       toast(employee ? "تم تحديث بيانات الموظف ✓" : "تم إضافة الموظف ✓");
       return true;
@@ -1860,7 +1860,7 @@ function openEmployeeModal(employee = null) {
   );
 }
 
-$("#addEmployeeBtn").addEventListener("click", openEmployeeModal);
+$("#addEmployeeBtn").addEventListener("click", () => openEmployeeModal());
 
 function editEmployee(id) {
   const employee = getEmployee(id);

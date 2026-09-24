@@ -16,7 +16,7 @@ function getSafeErrorMessage(error) {
         "حصل خطأ أثناء الاتصال بالـAI";
 
     return String(message)
-        .replace(/sk-[^\s"'`]+/g, "[redacted]")
+        .replace(/(?:sk|gsk)_[^\s"'`]+/g, "[redacted]")
         .slice(0, 300);
 }
 
@@ -45,17 +45,18 @@ app.get("/js/app.js", (req, res) => {
 });
 
 // ===============================
-// OPENAI
+// GROQ
 // ===============================
 
 let client;
 
-function getOpenAIClient() {
+function getGroqClient() {
 
-    if (!client && process.env.OPENAI_API_KEY) {
+    if (!client && process.env.GROQ_API_KEY) {
 
         client = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: "https://api.groq.com/openai/v1"
         });
     }
 
@@ -70,32 +71,28 @@ const tools = [
     {
         type: "function",
 
-        name: "get_grovia_snapshot",
-
-        description:
-            "Get current GROVIA data about employees, departments, attendance, leave, followups, companies, returns and tasks.",
-
-        parameters: {
-            type: "object",
-
-            properties: {},
-
-            additionalProperties: false
+        function: {
+            name: "get_grovia_snapshot",
+            description:
+                "Get current GROVIA data about employees, departments, attendance, leave, followups, companies, returns and tasks.",
+            parameters: {
+                type: "object",
+                properties: {},
+                additionalProperties: false
+            }
         }
     },
 
     {
         type: "function",
 
-        name: "save_grovia_update",
-
-        description:
-            "Save an update when the supervisor explicitly asks to record or modify something in GROVIA.",
-
-        parameters: {
-            type: "object",
-
-            properties: {
+        function: {
+            name: "save_grovia_update",
+            description:
+                "Save an update when the supervisor explicitly asks to record or modify something in GROVIA.",
+            parameters: {
+                type: "object",
+                properties: {
 
                 type: {
                     type: "string",
@@ -131,12 +128,12 @@ const tools = [
                 }
             },
 
-            required: [
-                "type",
-                "title"
-            ],
-
-            additionalProperties: false
+                required: [
+                    "type",
+                    "title"
+                ],
+                additionalProperties: false
+            }
         }
     }
 ];
@@ -238,7 +235,7 @@ app.get("/api/health", (req, res) => {
         service: "GROVIA AI",
 
         configured: Boolean(
-            process.env.OPENAI_API_KEY
+            process.env.GROQ_API_KEY
         )
     });
 });
@@ -255,16 +252,16 @@ app.post("/api/ai", async (req, res) => {
         // CHECK API KEY
         // -------------------------------
 
-        const openai = getOpenAIClient();
+        const groq = getGroqClient();
 
-        if (!openai) {
+        if (!groq) {
 
             return res.status(500).json({
 
                 ok: false,
 
                 error:
-                    "OPENAI_API_KEY غير موجود في ملف .env"
+                    "GROQ_API_KEY غير موجود في إعدادات الخادم"
             });
         }
 
@@ -309,10 +306,10 @@ app.post("/api/ai", async (req, res) => {
         // AI INPUT
         // -------------------------------
 
-        const input = [
+        const messages = [
 
             {
-                role: "developer",
+                role: "system",
 
                 content:
                     SYSTEM_PROMPT
@@ -343,13 +340,13 @@ app.post("/api/ai", async (req, res) => {
         // -------------------------------
 
         let response =
-            await openai.responses.create({
+            await groq.chat.completions.create({
 
                 model:
-                    process.env.OPENAI_MODEL ||
-                    "gpt-4o-mini",
+                    process.env.GROQ_MODEL ||
+                    "llama-3.3-70b-versatile",
 
-                input,
+                messages,
 
                 tools,
 
@@ -369,20 +366,13 @@ app.post("/api/ai", async (req, res) => {
         // -------------------------------
 
         for (
-            const item of response.output || []
+            const item of             response.choices?.[0]?.message?.tool_calls || []
         ) {
 
-            if (
-                item.type !==
-                "function_call"
-            ) {
-                continue;
-            }
-
             const args =
-                item.arguments
+                item.function?.arguments
                     ? JSON.parse(
-                        item.arguments
+                        item.function.arguments
                     )
                     : {};
 
@@ -391,19 +381,19 @@ app.post("/api/ai", async (req, res) => {
             // ---------------------------
 
             if (
-                item.name ===
+                item.function?.name ===
                 "get_grovia_snapshot"
             ) {
 
                 toolOutputs.push({
 
-                    type:
-                        "function_call_output",
+                    role:
+                        "tool",
 
-                    call_id:
-                        item.call_id,
+                    tool_call_id:
+                        item.id,
 
-                    output:
+                    content:
                         JSON.stringify(
                             snapshot
                         )
@@ -415,7 +405,7 @@ app.post("/api/ai", async (req, res) => {
             // ---------------------------
 
             if (
-                item.name ===
+                item.function?.name ===
                 "save_grovia_update"
             ) {
 
@@ -423,13 +413,13 @@ app.post("/api/ai", async (req, res) => {
 
                 toolOutputs.push({
 
-                    type:
-                        "function_call_output",
+                    role:
+                        "tool",
 
-                    call_id:
-                        item.call_id,
+                    tool_call_id:
+                        item.id,
 
-                    output:
+                    content:
                         JSON.stringify({
 
                             ok: true,
@@ -452,17 +442,17 @@ app.post("/api/ai", async (req, res) => {
         ) {
 
             response =
-                await openai.responses.create({
+                await groq.chat.completions.create({
 
                     model:
-                        process.env.OPENAI_MODEL ||
-                        "gpt-4o-mini",
+                        process.env.GROQ_MODEL ||
+                        "llama-3.3-70b-versatile",
 
-                    previous_response_id:
-                        response.id,
-
-                    input:
-                        toolOutputs,
+                    messages: [
+                        ...messages,
+                        response.choices[0].message,
+                        ...toolOutputs
+                    ],
 
                     tools
                 });
@@ -477,7 +467,7 @@ app.post("/api/ai", async (req, res) => {
             ok: true,
 
             text:
-                response.output_text ||
+                response.choices?.[0]?.message?.content ||
                 "تمام، محتاج تفاصيل أكتر عشان أساعدك.",
 
             updates
